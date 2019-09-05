@@ -39,6 +39,7 @@ if __name__ == "__main__":
     parser.add_argument("--css", type=str, help="Path to css file.")
     parser.add_argument("--standalone", action="store_true")
     parser.add_argument("--template", type=str)
+    parser.add_argument("--prepend_path", type=str, default="")
     args = parser.parse_args()
 
     if not os.path.exists("public"):
@@ -51,10 +52,24 @@ if __name__ == "__main__":
     manuscript = get_manuscript_file(args.input_dir, EXTENSIONS[args.source_format])
     bibtex = get_bibtex_file(args.input_dir)
 
+    lua = """function Image( element )
+      prepend_path = "{%PREPEND_PATH_PLACEHOLDER%}"
+      image = pandoc.Image( element.caption, element.src, element.title )
+      image.src = prepend_path .. element.src
+      image.identifier = element.identifier
+      image.attributes.style = "width: " .. tostring( element.attributes.width ) .. ", height: " .. tostring( element.attributes.height ) .. ";"
+      return image
+    end
+    """
+
+    with open( "image-filter.lua", "w" ) as file:
+        lua = lua.replace( "{%PREPEND_PATH_PLACEHOLDER%}", args.prepend_path )
+        file.write( lua )
+
     filters = ["pandoc-citeproc"]
     extra_args = ["--mathjax", "--bibliography", bibtex.path]
     if args.standalone:
-        extra_args += ["--standalone"]
+        extra_args += ["--standalone", "--lua-filter=image-filter.lua"]
     if args.css is not None:
         extra_args += ["--css", args.css]
     if args.template:

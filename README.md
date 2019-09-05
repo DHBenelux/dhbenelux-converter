@@ -30,3 +30,9 @@ To convert the submission of Kemman from LaTeX to HTML, run the following:
 ``` bash
 python converter.py --source_format latex --target_format html --input_dir submission/Kemman-final-submission --output_dir public/Kemman-final-submission --css ../../static/css/styles.css --standalone
 ```
+
+To prepend a certain path to media sources in the HTML, use the prepend_path option, e.g.:
+
+```
+--prepend_path /wp-content/journal/issues/media/
+```

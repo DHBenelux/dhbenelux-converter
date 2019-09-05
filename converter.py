@@ -57,7 +57,6 @@ if __name__ == "__main__":
       image = pandoc.Image( element.caption, element.src, element.title )
       image.src = prepend_path .. element.src
       image.identifier = element.identifier
-      image.attributes.style = "width: " .. tostring( element.attributes.width ) .. ", height: " .. tostring( element.attributes.height ) .. ";"
       return image
     end
     """

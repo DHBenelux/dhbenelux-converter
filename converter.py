@@ -18,7 +18,17 @@ def get_bibtex_file(directory):
 
 
 def get_manuscript_file(directory, extension):
-    return next(f for f in os.scandir(directory) if f.name.endswith(extension))
+    files = [f for f in os.scandir(directory) if f.name.endswith(extension)]
+    if len(files) > 1:
+        print("Multiple candidate files... Searching for `main` or `manuscript`")
+        try:
+            manuscript = next(f for f in files if f.name.startswith(('main', 'manuscript')))
+        except StopIteration:
+            raise ValueError(
+                "No manuscript file found. Name the main manuscript as either `main.(tex|md)`")
+    else:
+        manuscript = files[0]
+    return manuscript
 
 
 if __name__ == "__main__":

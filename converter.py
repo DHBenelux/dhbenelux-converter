@@ -9,9 +9,12 @@ EXTENSIONS = {"markdown": (".md", ".markdown"), "latex": (".tex", ".latex")}
 
 
 def get_bibtex_file(directory):
-    return next(
-        f for f in os.scandir(directory) if f.name.endswith((".bib", ".bibtex"))
-    )
+    try:
+        return next(
+            f for f in os.scandir(directory) if f.name.endswith((".bib", ".bibtex"))
+        )
+    except StopIteration:
+        return None
 
 
 def get_manuscript_file(directory, extension):
@@ -66,7 +69,9 @@ if __name__ == "__main__":
         file.write( lua )
 
     filters = ["pandoc-citeproc"]
-    extra_args = ["--mathjax", "--bibliography", bibtex.path]
+    extra_args = ["--mathjax"]
+    if bibtex is not None:
+        extra_args += ["--bibliography", bibtex.path]
     if args.standalone:
         extra_args += ["--standalone", "--lua-filter=image-filter.lua"]
     if args.css is not None:

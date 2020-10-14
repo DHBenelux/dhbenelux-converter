@@ -12,3 +12,9 @@
 
   * HTML: "writers ((Bruni 1978), (Bruni 1984)), scholars"
   * PDF: "writers (Bruni (1978), Bruni (1984)), scholars"
+
+
+
+## Notes while remedying some of the above
+
+* Only if the `.tex` source has `\begin{Abstract}` … `\end{Abstract}` with a **capital A** the abstract will be ported to HTML by Pandoc, as a plain no title, no header(!) paragraph. It can basically only be distinguished as the abstract by assuming it is the first `p` element after the document `header` element (css selector `header+p` ).

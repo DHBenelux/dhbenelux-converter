@@ -1,20 +1,52 @@
 @import url('https://fonts.googleapis.com/css?family=Fira+Code|Lora&display=swap');
 
+
+/* If the screen size is 800px wide or less (iPad, Kindle in portrait). */
+@media screen and (max-width: 800px) {
+  html {
+    font-size: 10px;
+  }
+  body {
+    width: 60%;
+  }
+}
+
+/* If the screen size is smartphone */
+@media screen and (max-width: 450px) {
+  html {
+    font-size: 9px;
+  }
+  body {
+    width: 90%;
+  }
+}
+
+/* If the screen size is at least 801px wide (iPad, Kindle in landscape, computers). */
+@media screen and (min-width: 801px) {
+  html {
+    font-size: 12px;
+  }
+  body {
+    width: 60%;
+  }
+  p {
+    text-align: justify;
+    text-justify: inter-word;
+  }
+}
+
 html {
-    font-size: 15px;
     overflow-y: scroll;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
 }
 
 body {
-    width: 87.5%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 12.5%;
     font-family: 'Lora', Palatino, 'Palatino Linotype', Times, 'Times New Roman', serif;
     color: #111;
-    max-width: 1400px;
+    max-width: 700px;
 }
 
 a {
@@ -60,7 +92,7 @@ a::selection {
 
 p, ol, ul {
     font-size: 1.4rem;
-    line-height: 2rem;
+    line-height: 2.2rem;
 }
 
 p {
@@ -68,6 +100,10 @@ p {
     margin-bottom: 1.4rem;
     padding-right: 0;
     vertical-align: baseline;
+}
+
+#refs p, .footnotes p, p.author {
+  text-align: left;
 }
 
 img {
@@ -108,16 +144,16 @@ figcaption {
 
 section {
     padding-top: 1rem;
-    padding-bottom: 1rem; 
+    padding-bottom: 1rem;
 }
 
 article {
-    padding: 5rem 0rem; 
+    padding: 5rem 0rem;
 }
 
 h1, h2, h3, h4 {
     font-weight: 400;
-    line-height: 1;    
+    line-height: 1;
 }
 
 h1, .title {
@@ -126,7 +162,7 @@ h1, .title {
 }
 
 .title {
-    line-height: 1.5;
+    line-height: 1.3;
     font-size: 3.6rem;
     margin-bottom: 3.5rem;
 }
@@ -279,5 +315,6 @@ table td {
 .author {
     margin-top: 2.1rem;
     margin-bottom: 2.1rem;
-    font-size: 2.1rem;
+    font-size: 1.8rem;
+    line-height: 2.5rem;
 }

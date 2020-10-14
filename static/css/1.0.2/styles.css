@@ -106,10 +106,6 @@ p {
   text-align: left;
 }
 
-h2+p, h3+p, h4+p {
-  margin-top: -0.6rem;
-}
-
 img {
     max-width: 100%;
     border: 0;
@@ -192,6 +188,15 @@ h3 {
 h4 {
     font-size: 1.2rem;
     margin-top: 1.8rem;
+}
+
+h2+p, h3+p, h4+p {
+  margin-top: -0.6rem;
+}
+
+h2#References+div {
+    color: red;
+    margin-top: -0.6rem;
 }
 
 blockquote {

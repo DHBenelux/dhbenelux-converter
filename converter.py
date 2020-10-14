@@ -87,7 +87,7 @@ if __name__ == "__main__":
     if args.css is not None:
         extra_args += ["--css", args.css]
     if args.template:
-        extra_args += ["--template", args.template]
+        extra_args += ["--template={}".format( args.template ) ]
 
     outputfile = os.path.basename(manuscript.name) + (
         ".pdf" if args.target_format == "pdf" else ".html"

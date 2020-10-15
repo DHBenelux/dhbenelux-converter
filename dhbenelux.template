@@ -43,7 +43,13 @@ $endif$
 $for(author)$
 <p class="author">$author$</p>
 $endfor$
+$for(affil)$
+<p class="affil">$affil$</p>
+$endfor$
 </header>
+$endif$
+$if(abstract)$
+<div class="abstract">$abstract$</div>
 $endif$
 $if(toc)$
 <nav id="$idprefix$TOC" role="doc-toc">

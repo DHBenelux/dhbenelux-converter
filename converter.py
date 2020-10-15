@@ -5,7 +5,7 @@ import shutil
 import pypandoc
 
 
-EXTENSIONS = {"markdown": (".md", ".markdown"), "latex": (".tex", ".latex")}
+EXTENSIONS = {"markdown": (".md", ".markdown"), "latex": (".tex", ".latex"), "latex+raw_tex": (".tex", ".latex")}
 
 
 def get_bibtex_file(directory):
@@ -37,14 +37,14 @@ if __name__ == "__main__":
         "--source_format",
         type=str,
         required=True,
-        choices=["markdown", "latex"],
+        choices=["markdown", "latex", "latex+raw_tex"],
         help="Source file format.",
     )
     parser.add_argument(
         "--target_format",
         type=str,
         required=True,
-        choices=["pdf", "html"],
+        choices=[ "pdf", "html", "native" ],
         help="Target file format.",
     )
     parser.add_argument("--input_dir", type=str, required=True, help="Input path.")
@@ -52,6 +52,7 @@ if __name__ == "__main__":
     parser.add_argument("--css", type=str, help="Path to css file.")
     parser.add_argument("--standalone", action="store_true")
     parser.add_argument("--template", type=str)
+    parser.add_argument("--lua", type=str)
     parser.add_argument("--prepend_path", type=str, default="")
     args = parser.parse_args()
 
@@ -84,14 +85,20 @@ if __name__ == "__main__":
         extra_args += ["--bibliography", bibtex.path]
     if args.standalone:
         extra_args += ["--standalone", "--lua-filter=image-filter.lua"]
+    if args.lua:
+        extra_args += ["--lua-filter={}".format( args.lua ) ]
     if args.css is not None:
         extra_args += ["--css", args.css]
     if args.template:
         extra_args += ["--template={}".format( args.template ) ]
 
-    outputfile = os.path.basename(manuscript.name) + (
-        ".pdf" if args.target_format == "pdf" else ".html"
-    )
+    output_format = ".pdf"
+    if args.target_format == "html":
+        output_format = ".html"
+    elif args.target_format == "native":
+        output_format = ".ast.txt"
+
+    outputfile = os.path.basename(manuscript.name) + output_format
 
     # copy contents of submission folder to public
     for fp in os.scandir(args.input_dir):

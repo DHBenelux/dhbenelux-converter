@@ -2,13 +2,7 @@
 
 * Do we want abstracts on the articles or not? This should be part of the author guidelines.
 
-* We either need to make the Overleaf template more strict to avoid the use of `affil`, as only `address` percolates through to HTML via Pandoc. Or we have to devise some scriptyscript that rewrites the .tex on the fly.
-
-  **Edit JZ_20201016_0115**: Succeeded in adding lua filter and parsing to latex+raw_tex, thus extracting affiliation. However: how to get numbering correspongin authors to affiliations is still a mystery.
-
 * See references in Kemman et al. (issue 1). Bibliography is generated at the end of document, not between end of text and appendices. No idea why.
-
-  **Edit JZ_20201016_0118**: Probably doable to reorder with Lua filter.
 
 * Pandoc bibliography conversion is case sensitive (Overleaf's is apparently not), thus `@article{Svensson2011,` in `.bib` does result in `???` in HTML if the `.tex` has `\citep{svensson2011}`.
 

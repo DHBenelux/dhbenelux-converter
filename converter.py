@@ -1,7 +1,7 @@
 import argparse
 import os
 import shutil
-
+import regex
 import pypandoc
 
 
@@ -29,6 +29,38 @@ def get_manuscript_file(directory, extension):
     else:
         manuscript = files[0]
     return manuscript
+
+
+def post_process_html( latex_file_path, html_file_path ):
+    author_boiler_plate = '<p class="author">{}<sup>{}</sup></p>\n'
+    affil_boiler_plate = '<p class="author"><sup>{}</sup>{}</p>\n'
+
+    with open( latex_file_path, 'r' ) as latex_file:
+        latex = latex_file.read()
+    authors = regex.findall( r'\\author\[(\d+.*?)\](\{.*)', latex )
+    affiliations = regex.findall( r'\\affil\[(\d+)\](\{.*)', latex )
+    author_html = ''
+    affil_html = ''
+    for author in authors:
+        author_name = pypandoc.convert_text( author[1], 'plain', format='latex' )
+        author_name = regex.sub( '\n', ' ', author_name )
+        author_html += author_boiler_plate.format( author_name.strip(), author[0] )
+    for affiliation in affiliations:
+        affil = pypandoc.convert_text( affiliation[1], 'plain', format='latex' )
+        affil = regex.sub( '\n', ' ', affil )
+        affil_html += affil_boiler_plate.format( affiliation[0], affil.strip() )
+
+    with open( html_file_path, 'r' ) as html_file:
+        html = html_file.read()
+    header = regex.search( r'\<header.*?\>.*</header>', html, regex.DOTALL )
+    header_span = header.span()
+    header = header.group(0)
+    header = regex.sub( r'<p class="author".*?>\n', '', header )
+    insertion_idx = regex.search( r'</h1>\n', header ).span()[1]
+    header = header[0:insertion_idx] + author_html + affil_html + header[insertion_idx:]
+    html = html[0:header_span[0]] + header + html[header_span[1]:]
+    with open( html_file_path, 'w' ) as html_file:
+        html_file.write( html )
 
 
 if __name__ == "__main__":
@@ -79,8 +111,9 @@ if __name__ == "__main__":
         lua = lua.replace( "{%PREPEND_PATH_PLACEHOLDER%}", args.prepend_path )
         file.write( lua )
 
-    filters = ["pandoc-citeproc"]
-    extra_args = ["--mathjax"]
+    # filters = ["pandoc-citeproc"]
+    filters = []
+    extra_args = ["--mathjax", "--citeproc"]
     if bibtex is not None:
         extra_args += ["--bibliography", bibtex.path]
     if args.standalone:
@@ -115,3 +148,6 @@ if __name__ == "__main__":
         filters=filters,
         outputfile=f"{args.output_dir}/{outputfile}",
     )
+
+    if args.source_format == 'latex' and args.target_format == 'html':
+        post_process_html( manuscript.path, '{}/{}'.format( args.output_dir, outputfile ) )

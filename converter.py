@@ -1,3 +1,4 @@
+from typing import Tuple
 import argparse
 import os
 import shutil
@@ -8,7 +9,7 @@ import pypandoc
 EXTENSIONS = {"markdown": (".md", ".markdown"), "latex": (".tex", ".latex"), "latex+raw_tex": (".tex", ".latex")}
 
 
-def get_bibtex_file(directory):
+def get_bibtex_file(directory: str):
     try:
         return next(
             f for f in os.scandir(directory) if f.name.endswith((".bib", ".bibtex"))
@@ -17,7 +18,7 @@ def get_bibtex_file(directory):
         return None
 
 
-def get_manuscript_file(directory, extension):
+def get_manuscript_file(directory: str, extension: str):
     files = [f for f in os.scandir(directory) if f.name.endswith(extension)]
     if len(files) > 1:
         print("Multiple candidate files... Searching for `main` or `manuscript`")
@@ -31,12 +32,32 @@ def get_manuscript_file(directory, extension):
     return manuscript
 
 
-def post_process_html( latex_file_path, html_file_path ):
+def has_single_author(latex: str) -> bool:
+    author = regex.search(r'\\author\{.*\}', latex)
+    affiliation = regex.search(r'\\affil\{.*\}', latex)
+    return author and affiliation
+
+
+def get_single_author(latex: str) -> Tuple[str, str]:
+    author_boiler_plate = '<p class="author">{}</p>\n'
+    affil_boiler_plate = '<p class="author">{}</p>\n'
+
+    author = regex.search(r'\\author\{(.*)\}', latex)
+    affiliation = regex.search(r'\\affil\{(.*)\}', latex)
+    author_name = pypandoc.convert_text( author[1], 'plain', format='latex' )
+    author_name = regex.sub( '\n', ' ', author_name )
+    author_html = author_boiler_plate.format( author_name.strip() )
+
+    affil = pypandoc.convert_text( affiliation[1], 'plain', format='latex' )
+    affil = regex.sub( '\n', ' ', affil )
+    affil_html = affil_boiler_plate.format( affil.strip() )
+    return author_html, affil_html
+
+
+def get_multi_authors(latex: str) -> Tuple[str, str]:
     author_boiler_plate = '<p class="author">{}<sup>{}</sup></p>\n'
     affil_boiler_plate = '<p class="author"><sup>{}</sup>{}</p>\n'
 
-    with open( latex_file_path, 'r' ) as latex_file:
-        latex = latex_file.read()
     authors = regex.findall( r'\\author\[(\d+.*?)\](\{.*)', latex )
     affiliations = regex.findall( r'\\affil\[(\d+)\](\{.*)', latex )
     author_html = ''
@@ -49,6 +70,16 @@ def post_process_html( latex_file_path, html_file_path ):
         affil = pypandoc.convert_text( affiliation[1], 'plain', format='latex' )
         affil = regex.sub( '\n', ' ', affil )
         affil_html += affil_boiler_plate.format( affiliation[0], affil.strip() )
+    return author_html, affil_html
+
+
+def post_process_html( latex_file_path: str, html_file_path: str ) -> None:
+    with open( latex_file_path, 'r' ) as latex_file:
+        latex = latex_file.read()
+    if has_single_author(latex):
+        author_html, affil_html = get_single_author(latex)
+    else:
+        author_html, affil_html = get_multi_authors(latex)
 
     with open( html_file_path, 'r' ) as html_file:
         html = html_file.read()

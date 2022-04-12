@@ -33,8 +33,8 @@ def get_manuscript_file(directory: str, extension: str):
 
 
 def has_single_author(latex: str) -> bool:
-    author = regex.search(r'\\author\{.*\}', latex)
-    affiliation = regex.search(r'\\affil\{.*\}', latex)
+    author = regex.search(r'(?<!%+ *)\\author\{.*\}', latex)
+    affiliation = regex.search(r'(?<!%+ *)\\affil\{.*\}', latex)
     return author and affiliation
 
 
@@ -42,8 +42,8 @@ def get_single_author(latex: str) -> Tuple[str, str]:
     author_boiler_plate = '<p class="author">{}</p>\n'
     affil_boiler_plate = '<p class="author">{}</p>\n'
 
-    author = regex.search(r'\\author\{(.*)\}', latex)
-    affiliation = regex.search(r'\\affil\{(.*)\}', latex)
+    author = regex.search(r'(?<!%+ *)\\author\{(.*)\}', latex)
+    affiliation = regex.search(r'(?<!%+ *)\\affil\{(.*)\}', latex)
     author_name = pypandoc.convert_text( author[1], 'plain', format='latex' )
     author_name = regex.sub( '\n', ' ', author_name )
     author_html = author_boiler_plate.format( author_name.strip() )
@@ -58,8 +58,8 @@ def get_multi_authors(latex: str) -> Tuple[str, str]:
     author_boiler_plate = '<p class="author">{}<sup>{}</sup></p>\n'
     affil_boiler_plate = '<p class="author"><sup>{}</sup>{}</p>\n'
 
-    authors = regex.findall( r'\\author\[(\d+.*?)\](\{.*)', latex )
-    affiliations = regex.findall( r'\\affil\[(\d+)\](\{.*)', latex )
+    authors = regex.findall( r'(?<!%+ *)\\author\[(\d+.*?)\](\{.*)', latex )
+    affiliations = regex.findall( r'(?<!%+ *)\\affil\[(\d+)\](\{.*)', latex )
     author_html = ''
     affil_html = ''
     for author in authors:
@@ -94,7 +94,7 @@ def post_process_html( latex_file_path: str, html_file_path: str ) -> None:
         html_file.write( html )
 
 
-if __name__ == "__main__":
+def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--source_format",
@@ -122,13 +122,6 @@ if __name__ == "__main__":
     if not os.path.exists("public"):
         os.mkdir("public")
 
-    if os.path.exists(args.output_dir):
-        shutil.rmtree(args.output_dir)
-    os.makedirs(args.output_dir)
-
-    manuscript = get_manuscript_file(args.input_dir, EXTENSIONS[args.source_format])
-    bibtex = get_bibtex_file(args.input_dir)
-
     lua = """function Image( element )
       prepend_path = "{%PREPEND_PATH_PLACEHOLDER%}"
       image = pandoc.Image( element.caption, element.src, element.title )
@@ -141,6 +134,19 @@ if __name__ == "__main__":
     with open( "image-filter.lua", "w" ) as file:
         lua = lua.replace( "{%PREPEND_PATH_PLACEHOLDER%}", args.prepend_path )
         file.write( lua )
+
+    return args
+
+
+if __name__ == "__main__":
+    args = parse_arguments()
+
+    if os.path.exists(args.output_dir):
+        shutil.rmtree(args.output_dir)
+    os.makedirs(args.output_dir)
+
+    manuscript = get_manuscript_file(args.input_dir, EXTENSIONS[args.source_format])
+    bibtex = get_bibtex_file(args.input_dir)
 
     # filters = ["pandoc-citeproc"]
     filters = []
